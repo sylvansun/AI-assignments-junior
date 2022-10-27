@@ -10,6 +10,7 @@
 *.synctex.gz
 *.tex
 *.sty
+*.bib
 
 #python cache files 
 __pycache__/
