@@ -9,6 +9,7 @@
 *.aux
 *.synctex.gz
 *.tex
+*.sty
 
 #python cache files 
 __pycache__/
