@@ -11,6 +11,9 @@
 *.tex
 *.sty
 *.bib
+*.bst
+*.bbl
+*.blg
 
 #python cache files 
 __pycache__/
