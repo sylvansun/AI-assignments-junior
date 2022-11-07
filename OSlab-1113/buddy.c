@@ -123,10 +123,6 @@ struct page *buddy_get_pages(struct phys_mem_pool *pool, u64 order)
         return NULL;
     }
     struct page *page = list_entry(pool->free_lists[curr_order].free_list.next, struct page, node);
-    if (page == NULL){
-        return NULL;
-    }
-    
     return split_page(pool, order, page);
     
         /* LAB 2 TODO 2 END */
