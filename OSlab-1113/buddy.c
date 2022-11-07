@@ -126,7 +126,7 @@ static struct page *merge_page(struct phys_mem_pool *pool, struct page *page)
     buddy->allocated = 1;
     
     //delete the merged pages from the free lists
-    order_before_merged = page->order;
+    u64 order_before_merged = page->order;
     pool->free_lists[order_before_merged].nr_free -= 2;
     list_del(&page->node);
     list_del(&buddy->node);
@@ -135,7 +135,7 @@ static struct page *merge_page(struct phys_mem_pool *pool, struct page *page)
     page->order++;
     page->allocated = 0;
     pool->free_lists[order_before_merged + 1].nr_free ++ ;
-    list_add(&page->node,pool->free_lists[order_before_merged + 1].free_list);
+    list_add(&page->node, &pool->free_lists[order_before_merged + 1].free_list);
     
     return merge_page(pool,page);
         /* LAB 2 TODO 2 END */
@@ -156,7 +156,7 @@ void buddy_free_pages(struct phys_mem_pool *pool, struct page *page)
         
     //always put the page into a free list, then call merge_page to check if it can be merged
     page->allocated = 0;
-    cur_order = page->order;
+    u64 cur_order = page->order;
     list_add(&page->node, &pool->free_lists[cur_order].free_list);
     pool->free_lists[cur_order].nr_free++;
     
