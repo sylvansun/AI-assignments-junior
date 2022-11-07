@@ -24,7 +24,8 @@ __pycache__/
 
 
 #2022 fall assignments datasets and trained models
-NLPhw-1026/model.pkl 
-NLPhw-1026/data/news.2007.en.shuffled.deduped.test
-NLPhw-1026/data/news.2007.en.shuffled.deduped.train
+*.train
+*.test
+*.pkl
+
 
