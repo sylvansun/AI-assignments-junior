@@ -293,17 +293,17 @@ int unmap_range_in_pgtbl(void *pgtbl, vaddr_t va, size_t len)
          * mark the final level pte as invalid. Iterate until all pages are
          * unmapped.
          */
-    ptp_t* ptp = NULL;
-    pte_t* pte = NULL;
+    ptp_t* cur_ptp = (ptp_t *) pgtbl;
+    pte_t* pte;
     int result;
 
     for (const vaddr_t end_va = va + len; va < end_va; va += PAGE_SIZE) {
         cur_ptp = (ptp_t *) pgtbl;
         for(int level=0; level<3;++level){
-            result = get_next_ptp(ptp, level, va, &ptp, &pte, true);
+            result = get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, true);
             if(result == -ENOMAPPING){return result;}
         }
-        ptp->ent[GET_L3_INDEX(va)]->l3_page.is_valid = 0;
+        (cur_ptp->ent[GET_L3_INDEX(va)])->l3_page.is_valid = 0;
     };
 
     return 0;
