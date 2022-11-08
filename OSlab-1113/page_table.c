@@ -254,27 +254,26 @@ int map_range_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
          * pte with the help of `set_pte_flags`. Iterate until all pages are
          * mapped.
          */
-    u64 page_num = len / PAGE_SIZE + (len % PAGE_SIZE > 0);
+    u64 page_num = len / PAGE_SIZE;
+    if(len % PAGE_SIZE){ page_num++;}
 
     while (page_num > 0) {
-            ptp_t *current_ptp = (ptp_t *)pgtbl;
+            ptp_t *cur_ptp = (ptp_t *)pgtbl;
             pte_t *pte;
         
-            for (int i = 0; i < 3; ++i) {
-                    get_next_ptp(current_ptp, i, va, &current_ptp, &pte, true);
+            for (int level = 0; level < 3; ++level) {
+                    get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, true);
             }
             
-            // l3
+            //for L3, we need to set by ourselves
             for (int i = GET_L3_INDEX(va); i < PTP_ENTRIES; ++i, va += PAGE_SIZE, pa += PAGE_SIZE,page_num--) {
                     pte_t new_pte_val;
-
                     new_pte_val.pte = 0;
                     new_pte_val.l3_page.is_valid = 1;
                     new_pte_val.l3_page.is_page = 1;
                     new_pte_val.l3_page.pfn = pa >> PAGE_SHIFT;
                     set_pte_flags(&new_pte_val, flags, USER_PTE);
-
-                    current_ptp->ent[i].pte = new_pte_val.pte;
+                    cur_ptp->ent[i].pte = new_pte_val.pte;
 
                     if (page_num == 0) {
                         return 0;
@@ -294,7 +293,20 @@ int unmap_range_in_pgtbl(void *pgtbl, vaddr_t va, size_t len)
          * mark the final level pte as invalid. Iterate until all pages are
          * unmapped.
          */
+    ptp_t* cur_ptp = (ptp_t *) pgtbl;
+    pte_t* pte;
+    int result;
 
+    for (const vaddr_t end_va = va + len; va < end_va; va += PAGE_SIZE) {
+        for(int level=0; level<3;++level){
+            result = get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, true);
+            if(result == -ENOMAPPING){return result;}
+        }
+            pte = &(ptp->ent[GET_L3_INDEX(va)]);
+            pte->l3_page.is_valid = 0;
+    };
+
+    return 0;
         /* LAB 2 TODO 3 END */
 }
 
