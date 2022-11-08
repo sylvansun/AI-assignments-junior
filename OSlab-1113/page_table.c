@@ -254,7 +254,35 @@ int map_range_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
          * pte with the help of `set_pte_flags`. Iterate until all pages are
          * mapped.
          */
+    u64 page_num = len / PAGE_SIZE + (len % PAGE_SIZE > 0);
 
+    while (page_num > 0) {
+            ptp_t *current_ptp = (ptp_t *)pgtbl;
+            pte_t *pte;
+        
+            for (int i = 0; i < 3; ++i) {
+                    get_next_ptp(current_ptp, i, va, &current_ptp, &pte, true);
+            }
+            
+            // l3
+            for (int i = GET_L3_INDEX(va); i < PTP_ENTRIES; ++i, va += PAGE_SIZE, pa += PAGE_SIZE,page_num--) {
+                    pte_t new_pte_val;
+
+                    new_pte_val.pte = 0;
+                    new_pte_val.l3_page.is_valid = 1;
+                    new_pte_val.l3_page.is_page = 1;
+                    new_pte_val.l3_page.pfn = pa >> PAGE_SHIFT;
+                    set_pte_flags(&new_pte_val, flags, USER_PTE);
+
+                    current_ptp->ent[i].pte = new_pte_val.pte;
+
+                    if (page_num == 0) {
+                        return 0;
+                    }
+            }
+    }
+
+    return 0;
         /* LAB 2 TODO 3 END */
 }
 
