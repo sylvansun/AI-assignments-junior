@@ -263,7 +263,7 @@ int map_range_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
     
     while(cur_va < end_va){
         ptp = (ptp_t *) pgtbl;
-        for(int level=0; level<3;++level){
+        for(int level=0; level<3; ++level){
             result = get_next_ptp(ptp, level, cur_va, &ptp, &pte, true);
             if(result == -ENOMAPPING){return result;}
         }
@@ -271,8 +271,9 @@ int map_range_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
         pte = &(ptp->ent[GET_L3_INDEX(cur_va)]);
         pte->l3_page.is_valid = 1;
         pte->l3_page.is_page = 1;
-        pte->l3_page.pfn = pa >> PAGE_SHIFT;
+        pte->l3_page.pfn = cur_pa >> PAGE_SHIFT;
         set_pte_flags(pte, flags, USER_PTE);
+        
         cur_va += PAGE_SIZE;
         cur_pa += PAGE_SIZE;
     }
@@ -302,6 +303,7 @@ int unmap_range_in_pgtbl(void *pgtbl, vaddr_t va, size_t len)
         }
         pte = &(ptp->ent[GET_L3_INDEX(cur_va)]);
         pte->l3_page.is_valid = 0;
+        
         cur_va += PAGE_SIZE;
     };
 
