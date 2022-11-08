@@ -210,11 +210,12 @@ int query_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
     ptp_t *cur_ptp = (ptp_t *)pgtbl;
     pte_t *pte = NULL;
     int result=0;
-    int level=0;
     
-    for(;level <=3; ++level){
+    for(int level=0;level <=3; ++level){
+        
         result = get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, false);
         if (result == -ENOMAPPING) {return result;}
+        
         switch (level) {
             case 1:
                 if(result == BLOCK_PTP){//with L1 only return when result is a block ptp
