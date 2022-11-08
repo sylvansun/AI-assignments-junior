@@ -223,6 +223,7 @@ int query_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
                         *entry =pte;
                     }
                     *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L1(va);
+                    return 0;
                 }
                 
                 break;
@@ -232,6 +233,7 @@ int query_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
                         *entry =pte;
                     }
                     *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L2(va);
+                    return 0;
                 }
                 
                 break;
