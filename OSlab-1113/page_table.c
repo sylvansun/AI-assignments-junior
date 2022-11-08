@@ -315,8 +315,8 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
                             vmr_prop_t flags)
 {
         /* LAB 2 TODO 4 BEGIN */
-    ptp_t* ptp;
-    pte_t* pte;
+    ptp_t* ptp=NULL;
+    pte_t* pte=NULL;
     int result = 0;
     const vaddr_t end_va = va + len;
 
@@ -369,7 +369,44 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 int unmap_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, size_t len)
 {
         /* LAB 2 TODO 4 BEGIN */
+    ptp_t* ptp=NULL;
+    pte_t* pte=NULL;
+    int result = 0;
+    const vaddr_t end_va = va + len;
 
+    const u64 SIZE_1G = PAGE_SIZE * L1_PER_ENTRY_PAGES;
+    const u64 SIZE_2M = PAGE_SIZE * L2_PER_ENTRY_PAGES;
+    const u64 SHIFT_1G = PAGE_SHIFT + PAGE_ORDER + PAGE_ORDER;
+    const u64 SHIFT_2M = PAGE_SHIFT + PAGE_ORDER;
+
+    while (va + SIZE_1G < end_va) {
+        ptp = (ptp_t *)pgtbl;
+        result = get_next_ptp(ptp, 0, va, &ptp, &pte, true);
+        if(result == -ENOMAPPING){return result;}
+            
+        pte = &(ptp->ent[GET_L1_INDEX(va)]);
+        pte->l1_block.is_valid = 0;
+
+        va += SIZE_1G;
+        len -= SIZE_1G;
+    };
+
+    while (va + SIZE_2M < end_va) {
+        ptp = (ptp_t *)pgtbl;
+        for(int level=0; level<2;++level){
+            result = get_next_ptp(ptp, level, va, &ptp, &pte, true);
+            if(result == -ENOMAPPING){return result;}
+        }
+        pte = &(ptp->ent[GET_L2_INDEX(va)]);
+        pte->l2_block.is_valid = 0;
+
+        va += SIZE_2M;
+        len -= SIZE_2M;
+    };
+
+    unmap_range_in_pgtbl(pgtbl, va, len);
+
+    return 0;
         /* LAB 2 TODO 4 END */
 }
 
