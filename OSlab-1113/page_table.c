@@ -320,29 +320,29 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
     int result = 0;
     const vaddr_t end_va = va + len;
 
-    u64 page_size_1G = PAGE_SIZE * L1_PER_ENTRY_PAGES;
-    u64 page_shift_1G = PAGE_SHIFT + PAGE_ORDER + PAGE_ORDER;
+    const u64 SIZE_1G = PAGE_SIZE * L1_PER_ENTRY_PAGES;
+    const u64 SIZE_2M = PAGE_SIZE * L2_PER_ENTRY_PAGES;
+    const u64 SHIFT_1G = PAGE_SHIFT + PAGE_ORDER + PAGE_ORDER;
+    const u64 SHIFT_2M = PAGE_SHIFT + PAGE_ORDER;
 
-    while (va + page_size_1G < end_va) {
+    while (va + SIZE_1G < end_va) {
         ptp = (ptp_t *)pgtbl;
-        ret = get_next_ptp(ptp, 0, va, &ptp, &pte, true);
+        result = get_next_ptp(ptp, 0, va, &ptp, &pte, true);
         if(result == -ENOMAPPING){return result;}
+        
         pte = &(ptp->ent[GET_L1_INDEX(va)]);
         pte->l1_block.is_valid = 1;
         pte->l1_block.is_table = 0;
-        pte->l1_block.pfn = pa >> page_shift_1G;
+        pte->l1_block.pfn = pa >> SHIFT_1G;
         set_pte_flags(pte, flags, USER_PTE);
 
-        va += page_size_1G;
-        pa += page_size_1G;
-        len -= page_size_1G;
+        va += SIZE_1G;
+        pa += SIZE_1G;
+        len -= SIZE_1G;
             
     };
     
-    u64 page_size_2M = L2_PER_ENTRY_PAGES * PAGE_SIZE;
-    u64 page_shift_2M = PAGE_SHIFT + PAGE_ORDER;
-
-    while (va + page_size_2M < end_va) {
+    while (va + SIZE_2M < end_va) {
         ptp = (ptp_t *)pgtbl;
         for(int level=0; level<2;++level){
             result = get_next_ptp(ptp, level, va, &ptp, &pte, true);
@@ -352,12 +352,12 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
         pte = &(ptp->ent[GET_L2_INDEX(va)]);
         pte->l2_block.is_valid = 1;
         pte->l2_block.is_table = 0;
-        pte->l2_block.pfn = pa >> page_shift_2M;
+        pte->l2_block.pfn = pa >> SHIFT_2M;
         set_pte_flags(pte, flags, USER_PTE);
 
-        va += page_size_2M;
-        pa += page_size_2M;
-        len -= page_size_2M;
+        va += SIZE_2M;
+        pa += SIZE_2M;
+        len -= SIZE_2M;
     };
 
     map_range_in_pgtbl(pgtbl, va, pa, len, flags);
