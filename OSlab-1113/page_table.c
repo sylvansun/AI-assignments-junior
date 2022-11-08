@@ -216,38 +216,30 @@ int query_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
         result = get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, false);
         if (result == -ENOMAPPING) {return result;}
         
-        switch (level) {
-            case 1:
-                if(result == BLOCK_PTP){//with L1 only return when result is a block ptp
-                    if( entry != NULL){
-                        *entry =pte;
-                    }
-                    *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L1(va);
-                    return 0;
-                }
-                
-                break;
-            case 2:
-                if(result == BLOCK_PTP){//with L2 also return when result is a block ptp
-                    if( entry != NULL){
-                        *entry =pte;
-                    }
-                    *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L2(va);
-                    return 0;
-                }
-                
-                break;
-            case 3:
+        if(level == 0){continue;}
+        if(level < 3){
+            if(result == BLOCK_PTP){//with L1 and L2 only return when result is a block ptp
                 if( entry != NULL){
                     *entry =pte;
                 }
-                *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L3(va);
-                break;
-            default:
-                break;
+                switch (level) {
+                    case 1:
+                        *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L1(va);
+                        break;
+                    case 2:
+                        *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L2(va);
+                        break;
+                }
+                return 0;
+            }
+        }
+        if(level == 3){
+            if( entry != NULL){
+                *entry =pte;
+            }
+            *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L3(va);
         }
     }
-    
     return 0;
         /* LAB 2 TODO 3 END */
 }
