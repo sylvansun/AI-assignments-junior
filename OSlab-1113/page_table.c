@@ -295,16 +295,19 @@ int unmap_range_in_pgtbl(void *pgtbl, vaddr_t va, size_t len)
          */
     ptp_t* ptp = NULL;
     pte_t* pte = NULL;
-    int result;
-
-    for (const vaddr_t end_va = va + len; va < end_va; va += PAGE_SIZE) {
+    int result = 0;
+    const vaddr_t end_va = va + len;
+    vaddr_t cur_va = va;
+    
+    while (cur_va < end_va) {
         ptp = (ptp_t *) pgtbl;
         for(int level=0; level<3;++level){
-            result = get_next_ptp(ptp, level, va, &ptp, &pte, true);
+            result = get_next_ptp(ptp, level, cur_va, &ptp, &pte, true);
             if(result == -ENOMAPPING){return result;}
         }
-            pte = &(cur_ptp->ent[GET_L3_INDEX(va)]);
-            pte->l3_page.is_valid = 0;
+        pte = &(ptp->ent[GET_L3_INDEX(cur_va)]);
+        pte->l3_page.is_valid = 0;
+        cur_va += PAGE_SIZE;
     };
 
     return 0;
