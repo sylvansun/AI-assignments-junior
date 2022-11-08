@@ -221,22 +221,24 @@ int query_in_pgtbl(void *pgtbl, vaddr_t va, paddr_t *pa, pte_t **entry)
                     if( entry != NULL){
                         *entry =pte;
                     }
+                    *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L1(va);
                 }
-                *pa = virt_to_phys(curr_ptp) + GET_VA_OFFSET_L1(va);
+                
                 break;
             case 2:
-                if(result == BLOCK_PTP){//with L1 only return when result is a block ptp
+                if(result == BLOCK_PTP){//with L2 also return when result is a block ptp
                     if( entry != NULL){
                         *entry =pte;
                     }
+                    *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L2(va);
                 }
-                *pa = virt_to_phys(curr_ptp) + GET_VA_OFFSET_L2(va);
+                
                 break;
             case 3:
                 if( entry != NULL){
                     *entry =pte;
                 }
-                *pa = virt_to_phys(curr_ptp) + GET_VA_OFFSET_L3(va);
+                *pa = virt_to_phys(cur_ptp) + GET_VA_OFFSET_L3(va);
                 break;
             default:
                 break;
