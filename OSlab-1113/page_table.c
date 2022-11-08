@@ -317,7 +317,7 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
         /* LAB 2 TODO 4 BEGIN */
     ptp_t* ptp;
     pte_t* pte;
-    int ret = 0;
+    int result = 0;
     const vaddr_t end_va = va + len;
 
     u64 page_size_1G = PAGE_SIZE * L1_PER_ENTRY_PAGES;
@@ -326,18 +326,17 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
     while (va + page_size_1G < end_va) {
         ptp = (ptp_t *)pgtbl;
         ret = get_next_ptp(ptp, 0, va, &ptp, &pte, true);
-        if (ret < 0)
-                return ret;
+        if(result == -ENOMAPPING){return result;}
+        pte = &(ptp->ent[GET_L1_INDEX(va)]);
+        pte->l1_block.is_valid = 1;
+        pte->l1_block.is_table = 0;
+        pte->l1_block.pfn = pa >> page_shift_1G;
+        set_pte_flags(pte, flags, USER_PTE);
 
-            pte = &(ptp_1->ent[GET_L1_INDEX(va)]);
-            pte->l1_block.is_valid = 1;
-            pte->l1_block.is_table = 0;
-            pte->l1_block.pfn = pa >> page_shift_1G;
-            set_pte_flags(pte, flags, USER_PTE);
-
-            va += page_size_1G;
-            pa += page_size_1G;
-            len -= page_size_1G;
+        va += page_size_1G;
+        pa += page_size_1G;
+        len -= page_size_1G;
+            
     };
     
     u64 page_size_2M = L2_PER_ENTRY_PAGES * PAGE_SIZE;
@@ -345,22 +344,20 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
 
     while (va + page_size_2M < end_va) {
         ptp = (ptp_t *)pgtbl;
-            ret = get_next_ptp(ptp, 0, va, &ptp, &pte, true);
-            if (ret < 0)
-                    return ret;
-            ret = get_next_ptp(ptp, 1, va, &ptp, &pte, true);
-            if (ret < 0)
-                    return ret;
+        for(int level=0; level<2;++level){
+            result = get_next_ptp(ptp, level, va, &ptp, &pte, true);
+            if(result == -ENOMAPPING){return result;}
+        }
             
-            pte = &(ptp_2->ent[GET_L2_INDEX(va)]);
-            pte->l2_block.is_valid = 1;
-            pte->l2_block.is_table = 0;
-            pte->l2_block.pfn = pa >> page_shift_2M;
-            set_pte_flags(pte, flags, USER_PTE);
+        pte = &(ptp->ent[GET_L2_INDEX(va)]);
+        pte->l2_block.is_valid = 1;
+        pte->l2_block.is_table = 0;
+        pte->l2_block.pfn = pa >> page_shift_2M;
+        set_pte_flags(pte, flags, USER_PTE);
 
-            va += page_size_2M;
-            pa += page_size_2M;
-            len -= page_size_2M;
+        va += page_size_2M;
+        pa += page_size_2M;
+        len -= page_size_2M;
     };
 
     map_range_in_pgtbl(pgtbl, va, pa, len, flags);
