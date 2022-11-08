@@ -335,7 +335,7 @@ int map_range_in_pgtbl_huge(void *pgtbl, vaddr_t va, paddr_t pa, size_t len,
         pte = &(ptp->ent[GET_L1_INDEX(cur_va)]);
         pte->l1_block.is_valid = 1;
         pte->l1_block.is_table = 0;
-        pte->l1_block.pfn = pa >> page_shift_1G;
+        pte->l1_block.pfn = cur_pa >> PAGE_SHIFT_1G;
         set_pte_flags(pte, flags, USER_PTE);
 
         cur_va += PAGE_SIZE_1G;
