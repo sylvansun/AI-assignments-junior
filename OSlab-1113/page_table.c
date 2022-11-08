@@ -302,7 +302,7 @@ int unmap_range_in_pgtbl(void *pgtbl, vaddr_t va, size_t len)
             result = get_next_ptp(cur_ptp, level, va, &cur_ptp, &pte, true);
             if(result == -ENOMAPPING){return result;}
         }
-            pte = &(ptp->ent[GET_L3_INDEX(va)]);
+            pte = &(cur_ptp->ent[GET_L3_INDEX(va)]);
             pte->l3_page.is_valid = 0;
     };
 
