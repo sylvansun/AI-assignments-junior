@@ -5,8 +5,6 @@ import numpy as np
 import jittor as jt
 from jittor import distributions
 
-from model import Net
-
 
 def test_data_type():
     a = jt.float32([1,2,3])
@@ -52,7 +50,7 @@ if __name__ == "__main__":
     
     train_data, test_data, pdf = get_data(**data_kwargs)
     
+    print(len(test_data[0]))
     print(type(data_kwargs))
     test_data_type()
     test_func()
-
