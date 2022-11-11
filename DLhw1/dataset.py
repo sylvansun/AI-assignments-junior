@@ -1,8 +1,9 @@
 from jittor.dataset.dataset import Dataset
 import jittor as jt
+
 class RandomData(Dataset):
     def __init__(self, 
-                 f, 
+                 function_to_fit, 
                  batch_size = 50, 
                  sample_size = 800,
                  interval = [-5, 5]):
@@ -10,7 +11,7 @@ class RandomData(Dataset):
         self.set_attrs(total_len = sample_size)
         self.sample_size = sample_size
         self.interval = interval
-        self.func = f
+        self.func = function_to_fit
         self.data = self.generate_data()
     
     def __getitem__(self, idx):
