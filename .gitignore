@@ -22,6 +22,7 @@ __pycache__/
 .idea/
 .ipynb_checkpoints/
 tutorial/
+auxiliary.py
 
 
 #2022 fall assignments datasets and trained models
