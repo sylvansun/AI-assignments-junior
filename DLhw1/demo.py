@@ -54,3 +54,10 @@ if __name__ == "__main__":
     print(type(data_kwargs))
     test_data_type()
     test_func()
+    
+    
+    input = np.random.uniform(-5, 5, 1).astype('float32')
+    print(input)
+    
+    x = jt.rand(20)
+    print(x)
