@@ -36,28 +36,9 @@ def get_data(mean=0, std=1, interval=[-5, 5], num_samples=1000, split=0.8):
 
 
 if __name__ == "__main__":
-    jt.set_global_seed(0)
-
-    data_kwargs = {
-        'mean': 0,
-        'std': 1,
-        'interval': [-5, 5],
-        'num_samples': 1000,
-        'split': 0.8
-    }
-    num_epoch = 1000
-    lr = 3e-4
-    
-    train_data, test_data, pdf = get_data(**data_kwargs)
-    
-    print(len(test_data[0]))
-    print(type(data_kwargs))
-    test_data_type()
-    test_func()
-    
-    
-    input = np.random.uniform(-5, 5, 1).astype('float32')
-    print(input)
-    
-    x = jt.rand(20)
+    x = jt.rand(8)
+    y = x**3
+    a = (x,y)
+    print(type(a))
+    print(a[0])
     print(x)
