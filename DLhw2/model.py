@@ -1,6 +1,5 @@
 from jittor import Module, nn
 
-
 class Classifier(Module):
     def __init__(self, num_classes=10):
         super(Classifier, self).__init__()

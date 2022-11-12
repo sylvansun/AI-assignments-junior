@@ -7,23 +7,19 @@ from model import Classifier
 
 class CIFAR10(Dataset):
     base_folder = 'cifar-10-batches-py'
-    train_list = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5',]
+    train_list = ['data_batch_1', 'data_batch_2', 'data_batch_3', 'data_batch_4', 'data_batch_5']
     test_list = ['test_batch']
     meta = {'filename': 'batches.meta','key': 'label_names'}
 
-    def __init__(self, batch_size=2, root="cifar_data/", train=True):
-
-        super(CIFAR10, self).__init__(batch_size=batch_size)
+    def __init__(self, batch_size=16, root="cifar_data/", train=True, drop_last=False):
+        super(CIFAR10, self).__init__(batch_size=batch_size, drop_last=drop_last)
         self.root = root
         self.train = train 
-
         if self.train:
             downloaded_list = self.train_list
         else:
             downloaded_list = self.test_list
-
-        self.data = []
-        self.targets = []
+        self.data, self.targets = [], []
         for file_name in downloaded_list:
             file_path = os.path.join(self.root, self.base_folder, file_name)
             with open(file_path, 'rb') as f:
@@ -33,7 +29,6 @@ class CIFAR10(Dataset):
                     self.targets.extend(entry['labels'])
                 else:
                     self.targets.extend(entry['fine_labels'])
-
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
         self.data = jt.float32(self.data)
         self._load_meta()
@@ -51,20 +46,19 @@ class CIFAR10(Dataset):
 
     def __len__(self):
         return len(self.data)
-
+    def size(self):
+        return self.__len__()
 
 
 if __name__ == "__main__":
     
-    train_data = CIFAR10(train=True)
+    train_data = CIFAR10(train=True, batch_size=64)
     test_data = CIFAR10(train=False)
     model = Classifier()
 
-    print(len(train_data.data), len(test_data.data))
-    
-    for imgs, labels in train_data:
-        print(imgs.shape, labels)
-        print(type(imgs))
-        print(model(imgs))
-        break
+    print(train_data.size())
+    print(test_data.size())
+    for batch_idx, (imgs, labels) in enumerate(train_data):
+        print(batch_idx)
+        print(imgs.shape, labels, model(imgs).shape)
     
