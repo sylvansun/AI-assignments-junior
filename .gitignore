@@ -29,5 +29,6 @@ auxiliary.py
 *.train
 *.test
 *.pkl
+cifar_data/
 
 
