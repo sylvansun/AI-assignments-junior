@@ -15,7 +15,6 @@ class Classifier(Module):
         self.fc3 = nn.Linear(96, num_classes)
 
     def execute(self, x):
-        print(x.shape)
         x = self.conv1(x)
         x = self.bn1(x)
         x = nn.relu(x)

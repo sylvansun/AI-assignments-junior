@@ -11,8 +11,8 @@ class CIFAR10(Dataset):
     test_list = ['test_batch']
     meta = {'filename': 'batches.meta','key': 'label_names'}
 
-    def __init__(self, batch_size=16, root="cifar_data/", train=True, drop_last=False):
-        super(CIFAR10, self).__init__(batch_size=batch_size, drop_last=drop_last)
+    def __init__(self, batch_size=64, root="cifar_data/", train=True, drop_last=False, shuffle=False):
+        super(CIFAR10, self).__init__(batch_size=batch_size, drop_last=drop_last, shuffle=shuffle)
         self.root = root
         self.train = train 
         if self.train:
@@ -46,19 +46,13 @@ class CIFAR10(Dataset):
 
     def __len__(self):
         return len(self.data)
-    def size(self):
-        return self.__len__()
 
 
 if __name__ == "__main__":
     
     train_data = CIFAR10(train=True, batch_size=64)
     test_data = CIFAR10(train=False)
-    model = Classifier()
 
-    print(train_data.size())
-    print(test_data.size())
-    for batch_idx, (imgs, labels) in enumerate(train_data):
-        print(batch_idx)
-        print(imgs.shape, labels, model(imgs).shape)
+    print(len(train_data),len(test_data))
+    
     
