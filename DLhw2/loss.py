@@ -17,7 +17,7 @@ def cross_entropy_loss(output, target):
 def weighted_cross_entropy_loss(output, target, weight = 0.1):
     target = target.reshape((-1, ))
     target_weight = np.ones(target.shape[0], dtype='float32')
-    target_weight[label.numpy() < 5] = weight
+    target_weight[target.numpy() < 5] = weight
     target_weight = jt.array(target_weight)
     
     target = target.broadcast(output, [1])
@@ -26,7 +26,7 @@ def weighted_cross_entropy_loss(output, target, weight = 0.1):
     output = output - output.max([1], keepdims=True)
     logsum = output.exp().sum(1).log()
     loss = (logsum - (output*target).sum(1)) * target_weight
-    return loss.mean() / target_weight.mean()
+    return loss.mean()
 
 
 if __name__ == "__main__":
