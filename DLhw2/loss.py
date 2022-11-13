@@ -27,6 +27,12 @@ def weighted_cross_entropy_loss(output, target, weight = 10):
     loss = (logsum - (output*target).sum(1)) * target_weight
     return loss.mean() / target_weight.mean()
 
+def make_loss():
+    loss_choice = {
+        "cross_entropy": cross_entropy_loss(),
+        "weighted_cross_entropy": weighted_cross_entropy_loss(),
+    }
+    return loss_choice
 
 if __name__ == "__main__":
     batch_size = 64

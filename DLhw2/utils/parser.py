@@ -1,7 +1,7 @@
 import argparse
 
 def make_parser():
-    parser = argparse.ArgumentParser(description='Training Congfiguration')
+    parser = argparse.ArgumentParser(description='Task2 Configurations')
     
     parser.add_argument(
         '--bs',
@@ -39,7 +39,13 @@ def make_parser():
         choices=["default", "drop", "upsample", "augment"],
         help='choose dataset'
     )
-
+    parser.add_argument(
+        '--loss',
+        type=str,
+        default='cross_entropy',
+        choices=['cross_entropy', 'weighted_cross_entropy'],
+        help='loss function'
+    )
     return parser
 
 
