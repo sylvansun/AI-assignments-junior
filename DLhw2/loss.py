@@ -29,8 +29,8 @@ def weighted_cross_entropy_loss(output, target, weight = 10):
 
 def make_loss():
     loss_choice = {
-        "cross_entropy": cross_entropy_loss(),
-        "weighted_cross_entropy": weighted_cross_entropy_loss(),
+        "cross_entropy": cross_entropy_loss,
+        "weighted_cross_entropy": weighted_cross_entropy_loss,
     }
     return loss_choice
 
