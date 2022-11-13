@@ -108,11 +108,5 @@ if __name__ == "__main__":
     drop_data.show_num_classes()
     upsample_data.show_num_classes()
     
-    # a = np.arange(20)
-    # np.random.shuffle(a)
-    # print(a)
-    # mask = a>=6
-    # a=a[mask]
-    # print(a)
     print("Done")
     
