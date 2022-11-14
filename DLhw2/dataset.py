@@ -110,6 +110,7 @@ class CIFAR10(Dataset):
                         self.targets = np.concatenate(
                             (self.targets, self.targets_dropped[i][sample_idx * 500 : (sample_idx + 1) * 500]), axis=0
                         )
+                print("data shape", self.data.shape, "target shape", self.targets.shape)
                 self.data = jt.float32(self.data)
 
             # vanilla drop ----> randomly select 500 data from each class with label 0, 1, 2, 3, 4  and add them to the dataset once
