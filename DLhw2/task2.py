@@ -2,6 +2,7 @@ import numpy as np
 import os
 from jittor import nn
 import jittor as jt
+from tqdm import tqdm
 
 from model import Classifier
 from dataset import CIFAR10
@@ -71,13 +72,13 @@ def task2(args):
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     folder_name = f"mode_{mode}_bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}_loss_{args.loss}"
-    if not os.path.exists(f"checkpoint/{folder_name}"):
-        os.mkdir(f"checkpoint/{folder_name}")
-    file_name = f"checkpoint/{folder_name}/log.txt"
+    if not os.path.exists(f"./checkpoint/{folder_name}"):
+        os.mkdir(f"./checkpoint/{folder_name}")
+    file_name = f"./checkpoint/{folder_name}/log.txt"
     file = open(file_name, "w")
     file.write(f"{folder_name}\n")
     train_losses, test_losses = [], []
-    for epoch_idx in range(1, num_epoch + 1):
+    for epoch_idx in tqdm(range(1, num_epoch + 1)):
         train_loss = train(model, train_loader, optimizer, epoch_idx, loss_function, file)
         test_loss = val(model, test_loader, epoch_idx, loss_function, file)
         train_losses.append(train_loss)
