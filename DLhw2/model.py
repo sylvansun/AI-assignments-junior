@@ -38,3 +38,4 @@ class Classifier(Module):
 if __name__ == "__main__":
     model = Classifier()
     print(model)
+    

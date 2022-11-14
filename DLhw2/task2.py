@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from jittor import nn
 import jittor as jt
 
@@ -8,7 +9,7 @@ from loss import make_loss
 from utils.parser import make_parser
 
 
-def train(model, train_loader, optimizer, epoch_idx, loss_function):
+def train(model, train_loader, optimizer, epoch_idx, loss_function, file):
     model.train()
     batch_size = train_loader.batch_size
     num_data = len(train_loader)
@@ -19,7 +20,7 @@ def train(model, train_loader, optimizer, epoch_idx, loss_function):
         loss = loss_function(outputs, labels)
         optimizer.step(loss)
         train_loss.append(loss.item())
-        print(
+        file.write(
             "Train epoch: {}  {:.2f}%\tLoss:{:.6f}".format(
                 epoch_idx, 100 * batch_idx * batch_size / num_data, loss.item()
             )
@@ -27,7 +28,7 @@ def train(model, train_loader, optimizer, epoch_idx, loss_function):
     return np.mean(train_loss)
 
 
-def val(model, test_loader, epoch_idx, loss_function):
+def val(model, test_loader, epoch_idx, loss_function, file):
     model.eval()
     num_data = len(test_loader)
 
@@ -44,9 +45,9 @@ def val(model, test_loader, epoch_idx, loss_function):
         num_correct = np.sum(labels.numpy() == pred)
         total_correct += num_correct
         batch_acc = num_correct / batch_size
-        print("Test epoch: {}  {:.2f}%\tAcc:{:.2f}".format(epoch_idx, 100 * count_data / num_data, batch_acc))
+        file.write("Test epoch: {}  {:.2f}%\tAcc:{:.2f}".format(epoch_idx, 100 * count_data / num_data, batch_acc))
     total_acc = total_correct / num_data
-    print(f"Test Epoch: {epoch_idx} \t Total Acc: {total_acc:.2f}")
+    file.write(f"Test Epoch: {epoch_idx} \t Total Acc: {total_acc:.2f}")
     return np.mean(test_loss)
 
 
@@ -69,10 +70,16 @@ def task2(args):
     model = Classifier()
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
+    folder_name = f"mode_{mode}_bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}_loss_{args.loss}"
+    if not os.path.exists(f"checkpoint/{folder_name}"):
+        os.mkdir(f"checkpoint/{folder_name}")
+    file_name = f"checkpoint/{folder_name}/log.txt"
+    file = open(file_name, "w")
+    file.write(f"{folder_name}\n")
     train_losses, test_losses = [], []
     for epoch_idx in range(1, num_epoch + 1):
-        train_loss = train(model, train_loader, optimizer, epoch_idx, loss_function)
-        test_loss = val(model, test_loader, epoch_idx, loss_function)
+        train_loss = train(model, train_loader, optimizer, epoch_idx, loss_function, file)
+        test_loss = val(model, test_loader, epoch_idx, loss_function, file)
         train_losses.append(train_loss)
         test_losses.append(test_loss)
 
