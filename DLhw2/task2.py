@@ -21,11 +21,12 @@ def train(model, train_loader, optimizer, epoch_idx, loss_function, file):
         loss = loss_function(outputs, labels)
         optimizer.step(loss)
         train_loss.append(loss.item())
-        file.write(
-            "Train epoch: {}  {:.2f}%\tLoss:{:.6f}".format(
-                epoch_idx, 100 * batch_idx * batch_size / num_data, loss.item()
+        if batch_idx % 100 == 0:
+            file.write(
+                "Train epoch: {}  {:.2f}%\tLoss:{:.6f}\n".format(
+                    epoch_idx, 100 * batch_idx * batch_size / num_data, loss.item()
+                )
             )
-        )
     return np.mean(train_loss)
 
 
@@ -35,20 +36,14 @@ def val(model, test_loader, epoch_idx, loss_function, file):
 
     test_loss = []
     total_correct = 0
-    count_data = 0
-    for batch_idx, (inputs, labels) in enumerate(test_loader):
-        batch_size = labels.shape[0]
-        count_data += batch_size
+    for _, (inputs, labels) in enumerate(test_loader):
         outputs = model(inputs)
         loss = loss_function(outputs, labels)
         test_loss.append(loss.item())
         pred = np.argmax(outputs.numpy(), axis=1)
-        num_correct = np.sum(labels.numpy() == pred)
-        total_correct += num_correct
-        batch_acc = num_correct / batch_size
-        file.write("Test epoch: {}  {:.2f}%\tAcc:{:.2f}".format(epoch_idx, 100 * count_data / num_data, batch_acc))
+        total_correct += np.sum(labels.numpy() == pred)
     total_acc = total_correct / num_data
-    file.write(f"Test Epoch: {epoch_idx} \t Total Acc: {total_acc:.2f}")
+    file.write(f"Test Epoch: {epoch_idx} \t Total Acc: {total_acc:.4f}\n")
     return np.mean(test_loss)
 
 
