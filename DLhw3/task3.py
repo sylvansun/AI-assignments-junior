@@ -21,7 +21,6 @@ def train(model, train_loader, optimizer, epoch_idx, file):
         outputs = outputs.reshape(-1, 4, 4)
         outputs = pygm.sinkhorn(outputs, backend="jittor")
         loss = (outputs-labels).sqr().sum() / batch_size
-        print(loss)
         optimizer.step(loss)
         train_loss.append(loss.item())
         if batch_idx % 100 == 0:
@@ -35,7 +34,6 @@ def train(model, train_loader, optimizer, epoch_idx, file):
 
 def val(model, test_loader, epoch_idx, file):
     model.eval()
-    num_data = len(test_loader)
 
     test_loss = []
     test_acc = []
