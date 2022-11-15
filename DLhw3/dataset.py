@@ -30,6 +30,7 @@ class CIFAR10P(Dataset):
                 else:
                     self.targets.extend(entry["fine_labels"])
         self.data = np.vstack(self.data).reshape(-1, 3, 32, 32)
+        self.data = jt.float32(self.data)
         self._load_meta()
         self.H = self.data.shape[2] // 2
         self.W = self.data.shape[3] // 2
@@ -50,7 +51,7 @@ class CIFAR10P(Dataset):
         label = np.zeros(shape=(4, 4), dtype=np.int32)
         for i in range(4):
             label[i, permutation_order[i]] = 1
-        return permuted, label.reshape(-1, 1)
+        return permuted, label, permutation_order
 
     def __len__(self):
         return len(self.data)
@@ -65,3 +66,5 @@ if __name__ == "__main__":
         print(img.shape)
         print(label.shape)
         break
+    
+    
