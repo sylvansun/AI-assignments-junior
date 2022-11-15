@@ -2,23 +2,26 @@ import numpy as np
 import os
 from jittor import nn
 import jittor as jt
+import pygmtools as pygm
 from tqdm import tqdm
 
 from model import PermNet
-from dataset import CIFAR10
-from loss import make_loss
+from dataset import CIFAR10P
 from utils.parser import make_parser
 
 
-def train(model, train_loader, optimizer, epoch_idx, loss_function, file):
+def train(model, train_loader, optimizer, epoch_idx, file):
     model.train()
     batch_size = train_loader.batch_size
     num_data = len(train_loader)
 
     train_loss = []
-    for batch_idx, (inputs, labels) in enumerate(train_loader):
+    for batch_idx, (inputs, labels, _) in enumerate(train_loader):
         outputs = model(inputs)
-        loss = loss_function(outputs, labels)
+        outputs = outputs.reshape(-1, 4, 4)
+        outputs = pygm.sinkhorn(outputs, backend="jittor")
+        loss = (outputs-labels).sqr().sum() / batch_size
+        print(loss)
         optimizer.step(loss)
         train_loss.append(loss.item())
         if batch_idx % 100 == 0:
@@ -30,21 +33,24 @@ def train(model, train_loader, optimizer, epoch_idx, loss_function, file):
     return np.mean(train_loss)
 
 
-def val(model, test_loader, epoch_idx, loss_function, file):
+def val(model, test_loader, epoch_idx, file):
     model.eval()
     num_data = len(test_loader)
 
     test_loss = []
-    total_correct = 0
-    for _, (inputs, labels) in enumerate(test_loader):
+    test_acc = []
+    for _, (inputs, labels, orders) in enumerate(test_loader):
         outputs = model(inputs)
-        loss = loss_function(outputs, labels)
+        outputs = outputs.reshape(-1, 4, 4)
+        outputs = pygm.sinkhorn(outputs, backend="jittor")
+        loss = (outputs-labels).sqr().sum() / labels.shape[0]
+        acc = (outputs.argmax(dim=2)[0] == orders).float().mean()
         test_loss.append(loss.item())
-        pred = np.argmax(outputs.numpy(), axis=1)
-        total_correct += np.sum(labels.numpy() == pred)
-    total_acc = total_correct / num_data
+        test_acc.append(acc.item())
+    total_acc = np.mean(test_acc)
     file.write(f"Test Epoch: {epoch_idx} \t Total Acc: {total_acc:.4f}\n")
     return np.mean(test_loss)
+
 
 
 def task3(args):
@@ -58,10 +64,9 @@ def task3(args):
     )
     if debug:
         num_epoch = 1
-    loss_function = make_loss()[args.loss]
 
-    train_loader = CIFAR10(train=True, batch_size=batch_size, shuffle=True, data_choice=mode)
-    test_loader = CIFAR10(train=False, batch_size=batch_size, shuffle=False, data_choice="default")
+    train_loader = CIFAR10P(train=True, batch_size=batch_size, shuffle=True)
+    test_loader = CIFAR10P(train=False, batch_size=batch_size, shuffle=False)
 
     model = PermNet()
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
@@ -74,8 +79,8 @@ def task3(args):
     file.write(f"{folder_name}\n")
     train_losses, test_losses = [], []
     for epoch_idx in tqdm(range(1, num_epoch + 1)):
-        train_loss = train(model, train_loader, optimizer, epoch_idx, loss_function, file)
-        test_loss = val(model, test_loader, epoch_idx, loss_function, file)
+        train_loss = train(model, train_loader, optimizer, epoch_idx, file)
+        test_loss = val(model, test_loader, epoch_idx, file)
         train_losses.append(train_loss)
         test_losses.append(test_loss)
 
