@@ -132,7 +132,7 @@ def pretrain(args):
 
     model = PermuteClassifier()
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-
+    model.pretrain()
     folder_name = f"pretrain_bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}"
     if not os.path.exists(f"./checkpoint/{folder_name}"):
         os.mkdir(f"./checkpoint/{folder_name}")
@@ -145,6 +145,7 @@ def pretrain(args):
     print("Pretrain Done!")
     file.close()
     model.classify()
+
     file_name = f"./checkpoint/{folder_name}/trainlog.txt"
     file = open(file_name, "w")
     file.write(f"{folder_name}\n")
@@ -152,8 +153,8 @@ def pretrain(args):
     test_loader = CIFAR10(train=False, batch_size=batch_size, shuffle=False)
     train_losses, test_losses = [], []
     for epoch_idx in tqdm(range(1, num_epoch + 1)):
-        train_loss = train2(model, train_loader, optimizer, epoch_idx,nn.CrossEntropyLoss, file)
-        test_loss = val2(model, test_loader, epoch_idx, nn.CrossEntropyLoss, file)
+        train_loss = train2(model, train_loader, optimizer, epoch_idx, nn.CrossEntropyLoss(), file)
+        test_loss = val2(model, test_loader, epoch_idx, nn.CrossEntropyLoss(), file)
         train_losses.append(train_loss)
         test_losses.append(test_loss)
     

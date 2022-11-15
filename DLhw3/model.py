@@ -93,8 +93,6 @@ class PermuteClassifier(Module):
         self.mlp2order = MLPPermuter()
         self.mlp2class = MLPClassifier()
         self.mode = mode
-        for param in self.mlp2class.parameters():
-            param.stop_grad()
         
     def execute(self, x):
         batch_size = x.shape[0]
@@ -103,15 +101,18 @@ class PermuteClassifier(Module):
             output = self.mlp2order(feature.reshape(batch_size, -1))
         else:
             output = self.mlp2class(feature.reshape(batch_size, -1))
-        return output 
+        return output
+    
+    def pretrain(self):
+        self.mode = "pretrain"
+        self.extractor.train()
+        self.mlp2order.train()
+        self.mlp2class.eval()
     def classify(self):
         self.mode = "classify"
-        for param in self.extractor.parameters():
-            param.stop_grad()
-        for param in self.mlp2order.parameters():
-            param.stop_grad()
-        for param in self.mlp2class.parameters():
-            param.start_grad()
+        self.extractor.eval()
+        self.mlp2order.eval()
+        self.mlp2class.train()
         return
         
 
