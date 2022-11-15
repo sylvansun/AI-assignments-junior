@@ -4,7 +4,7 @@ from jittor import nn
 import jittor as jt
 from tqdm import tqdm
 
-from model import Classifier
+from model import PermNet
 from dataset import CIFAR10
 from loss import make_loss
 from utils.parser import make_parser
@@ -63,7 +63,7 @@ def task3(args):
     train_loader = CIFAR10(train=True, batch_size=batch_size, shuffle=True, data_choice=mode)
     test_loader = CIFAR10(train=False, batch_size=batch_size, shuffle=False, data_choice="default")
 
-    model = Classifier()
+    model = PermNet()
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     folder_name = f"mode_{mode}_bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}_loss_{args.loss}"

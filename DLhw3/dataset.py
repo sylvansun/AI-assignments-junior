@@ -60,7 +60,6 @@ class CIFAR10P(Dataset):
 if __name__ == "__main__":
 
     train_data = CIFAR10P(train=True, batch_size=64)
-    img, label = train_data[0]
     
     for _, (img, label) in enumerate(train_data):
         print(img.shape)
