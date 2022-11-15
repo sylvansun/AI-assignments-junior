@@ -1,6 +1,7 @@
 from jittor import Module, nn
 import numpy as np
 import jittor as jt
+import pygmtools as pygm
 
 
 class Extractor(Module):
@@ -47,8 +48,13 @@ class PermNet(Module):
 
 if __name__ == "__main__":
     model = PermNet()
-
+    model.train()
     input = np.ones((64, 4, 3, 16, 16))
     input = jt.float32(input)
-    output = model(input)
-    print(output.shape)
+    print(input.shape)
+    outputs = model(input)
+    print(outputs.shape)
+    outputs = outputs.reshape(-1, 4, 4)
+    print(outputs.shape)
+    preds = pygm.sinkhorn(outputs, backend="jittor")
+    print(preds.shape)
