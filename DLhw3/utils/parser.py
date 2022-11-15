@@ -10,7 +10,7 @@ def make_parser():
     parser.add_argument("--ne", type=int, default=200, help="number of epochs")
     parser.add_argument("--debug", action="store_true", help="run in debug mode")
 
-
+    return parser
 if __name__ == "__main__":
     parser = make_parser()
     args = parser.parse_args()

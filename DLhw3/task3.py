@@ -52,8 +52,7 @@ def val(model, test_loader, epoch_idx, file):
 
 
 def task3(args):
-    mode, batch_size, learning_rate, weight_decay, num_epoch, debug = (
-        args.dataset,
+    batch_size, learning_rate, weight_decay, num_epoch, debug = (
         args.bs,
         args.lr,
         args.wd,
@@ -69,7 +68,7 @@ def task3(args):
     model = PermNet()
     optimizer = nn.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
-    folder_name = f"mode_{mode}_bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}_loss_{args.loss}"
+    folder_name = f"bs_{batch_size}_lr_{learning_rate}_wd_{weight_decay}_ne_{num_epoch}"
     if not os.path.exists(f"./checkpoint/{folder_name}"):
         os.mkdir(f"./checkpoint/{folder_name}")
     file_name = f"./checkpoint/{folder_name}/log.txt"
