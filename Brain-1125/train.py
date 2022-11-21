@@ -10,6 +10,7 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 from model import SNN, ANN
 
@@ -102,6 +103,12 @@ def snn_train(train_loader, test_loader, device='cpu'):
         test_acc_list.append(test_acc)
 
         print(f"Epoch {epoch}, Test Acc: {test_acc * 100:.2f}%\n")
+    fig = plt.figure(facecolor="w")
+    plt.plot(test_acc_list)
+    plt.title("Test Set Accuracy")
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.show()
         
 def ann_train(train_loader, test_loader, device):
     num_epochs = 100
