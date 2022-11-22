@@ -150,7 +150,25 @@ def refresh_bpe_vocab_by_merging_bigram(bigram, old_bpe_vocab):
     new_bpe_vocab = dict()
 
     # TODO: 完成函数体（1分）
-    pass
+    for word, freq in old_bpe_vocab.items():
+        new_word = []
+        idx = 0
+        split = word.split(' ')
+        while idx < len(split):
+            if idx == len(split)-1 :
+                new_word.append(split[idx])
+            else:
+                if tuple(split[idx:idx+2]) == bigram :
+                    new_word.append(bigram[0] + bigram[1])
+                    idx += 1
+                else:
+                    new_word.append(split[idx])
+            idx += 1
+        new_key = ''
+        for i in range(len(new_word)-1):
+            new_key += (new_word[i] + ' ')
+        new_key += (new_word[-1])
+        new_bpe_vocab[new_key] = freq
     
     return new_bpe_vocab
 
@@ -191,7 +209,17 @@ def get_bpe_tokens(bpe_vocab):
     """
     
     # TODO: 完成函数体（2分）
-    pass
+    bpe_tokens_as_dict = dict()
+    
+    for word, freq in bpe_vocab.items():
+        word_split = word.split(' ')
+        for key in word_split:
+            if key not in bpe_tokens_as_dict:
+                bpe_tokens_as_dict[key] = freq
+            else:
+                bpe_tokens_as_dict[key] += freq
+    bpe_tokens = list(bpe_tokens_as_dict.items())
+    bpe_tokens.sort(reverse = True, key = lambda x: len(x[0]) if x[0][-4:]!='</w>' else len(x[0]) - 3 )
 
     return bpe_tokens
 
@@ -229,7 +257,13 @@ def print_bpe_tokenize(word, bpe_tokens):
     
     # TODO: 请尝试使用递归函数定义该分词过程（2分）
     def bpe_tokenize(sub_word):
-        pass
+        if sub_word == '':
+            return sub_word
+        for word, freq in bpe_tokens:
+            for i in range(0, len(sub_word) - len(word) + 1):
+                if sub_word[i: i+len(word)] == word:
+                    return bpe_tokenize(sub_word[: i]) + word + ' ' + bpe_tokenize(sub_word[i+len(word):])
+        return '<unknown> '
 
     res = bpe_tokenize(word+"</w>")
     print(res)
