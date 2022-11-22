@@ -31,5 +31,6 @@ tutorial/
 *.txt
 cifar_data/
 mnist/
+caltech-101/
 
 
