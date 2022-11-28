@@ -129,14 +129,15 @@ if __name__ == '__main__':
     for i in range(102):
         if len(vec_dict[i]['kp']) < bneck_value:
             bneck_value = len(vec_dict[i]['kp'])
-
-    for i in range(102):
-        vec_dict[i]['kp'] = sorted((vec_dict[i]['kp']),key=lambda x: x.response, reverse=True)  
+        
         
     # TODO 为每个类别选择同样多的特征点用于聚类。特征点个数bneck_value
-    vec_list = vec_dict[0]['des'][0:bneck_value]
-    for i in range(1, 102):
-        vec_list.extend(vec_dict[i]['des'][0:bneck_value])
+    vec_list = []
+    for i in range(102):
+        coupled = list(zip(vec_dict[i]['kp'], vec_dict[i]['des']))
+        coupled = sorted(coupled, key=lambda x:x[0].response, reverse=True)
+        des_sorted = [x[1] for x in coupled]
+        vec_list.extend(des_sorted[0:bneck_value])
     vec_list = np.float64(vec_list)
     print(bneck_value, vec_list.shape)
     
