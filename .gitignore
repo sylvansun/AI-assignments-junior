@@ -32,5 +32,6 @@ tutorial/
 cifar_data/
 mnist/
 caltech-101/
+data/
 
 
