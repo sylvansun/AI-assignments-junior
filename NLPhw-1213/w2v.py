@@ -207,7 +207,9 @@ del debug_vocab
 
 def one_hot(dim: int, idx: int) -> np.ndarray:
     # TODO: 实现one-hot函数（1分）
-    pass
+    res = np.zeros(dim)
+    res[idx] = 1
+    return res
 
 
 print(one_hot(4, 1))
@@ -220,7 +222,8 @@ print(one_hot(4, 1))
 
 def softmax(x: np.ndarray) -> np.ndarray:
     # TODO: 实现softmax函数（2分）
-    pass
+    x = x - np.max(x)
+    return np.exp(x) / np.sum(np.exp(x))
 
 
 print(softmax(np.array([i for i in range(10)])))
@@ -279,13 +282,25 @@ class CBOW:
         # TODO: 构造输入向量和目标向量（3分）
         # context: 构造输入向量
         # target:  目标one-hot向量
-
+        x = np.zeros(len(self.vocab))
+        for str in context_tokens:
+            x[self.vocab.token_to_idx(str)] += 1
+        x /= C
+        VT = self.V.T
+        UT = self.U.T
         # TODO: 前向步骤（3分）
-
+        h = np.matmul(UT, x)
+        y = softmax(np.matmul(VT, h))
         # TODO: 计算loss（3分）
-
+        j = self.vocab.token_to_idx(target_token)
+        loss = -1 * np.log(y[j])
         # TODO: 更新参数（3分）
-
+        e = y.copy()
+        e[j] -= 1
+        VT -= learning_rate * e.reshape((-1, 1)) * h.reshape((1, -1))
+        UT -= learning_rate * np.matmul(np.matmul(self.V, e.reshape((-1, 1))), x.reshape((1, -1)))
+        self.V = VT.T
+        self.U = UT.T
         return loss
 
     def similarity(self, token1: str, token2: str):
