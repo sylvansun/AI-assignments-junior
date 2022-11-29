@@ -286,23 +286,21 @@ class CBOW:
         # context: 构造输入向量
         # target:  目标one-hot向量
         x = np.zeros(len(self.vocab))
-        for str in context_tokens:
-            x[self.vocab.token_to_idx(str)] += 1
-        x /= C
-        VT = self.V.T
-        UT = self.U.T
+        x[list(map(lambda x: self.vocab.token_to_idx(x), context_tokens))] = 1
+        xbar = x / C
+        
         # TODO: 前向步骤（3分）
-        h = UT@x
-        y = log_softmax(VT@h)
+        h = self.U.T@xbar
+        e = softmax(self.V.T@h)
+        y = log_softmax(self.V.T@h)
+        
         # TODO: 计算loss（3分）
         loss = -1 * y[self.vocab.token_to_idx(target_token)]
+        
         # TODO: 更新参数（3分）
-        e = softmax(VT@h)
         e[self.vocab.token_to_idx(target_token)] -= 1
-        VT -= learning_rate * e.reshape((-1, 1)) * h.reshape((1, -1))
-        UT -= learning_rate * self.V@e.reshape((-1, 1))@x.reshape((1, -1))
-        self.V = VT.T
-        self.U = UT.T
+        self.V -= (learning_rate * e.reshape(-1, 1)@h.reshape(1, -1)).T
+        self.U -= (learning_rate * self.V@e.reshape(-1, 1)@xbar.reshape(1, -1)).T
         return loss
 
     def similarity(self, token1: str, token2: str):
@@ -424,7 +422,7 @@ def test2():
     np.random.seed(42)
 
     corpus = "./data/treebank.txt"
-    lr = 0.02
+    lr = 0.023
     topn = 40
 
     vocab = Vocab(corpus, max_vocab_size=4000)
