@@ -228,6 +228,9 @@ def softmax(x: np.ndarray) -> np.ndarray:
 
 print(softmax(np.array([i for i in range(10)])))
 
+def log_softmax(x: np.ndarray) -> np.ndarray:
+    x = x - np.max(x)
+    return x - np.log(np.sum(np.exp(x)))
 
 # TODO：CBOW类，请补全`train_one_step`中的代码。
 #
@@ -289,16 +292,15 @@ class CBOW:
         VT = self.V.T
         UT = self.U.T
         # TODO: 前向步骤（3分）
-        h = np.matmul(UT, x)
-        y = softmax(np.matmul(VT, h))
+        h = UT@x
+        y = log_softmax(VT@h)
         # TODO: 计算loss（3分）
-        j = self.vocab.token_to_idx(target_token)
-        loss = -1 * np.log(y[j])
+        loss = -1 * y[self.vocab.token_to_idx(target_token)]
         # TODO: 更新参数（3分）
-        e = y.copy()
-        e[j] -= 1
+        e = softmax(VT@h)
+        e[self.vocab.token_to_idx(target_token)] -= 1
         VT -= learning_rate * e.reshape((-1, 1)) * h.reshape((1, -1))
-        UT -= learning_rate * np.matmul(np.matmul(self.V, e.reshape((-1, 1))), x.reshape((1, -1)))
+        UT -= learning_rate * self.V@e.reshape((-1, 1))@x.reshape((1, -1))
         self.V = VT.T
         self.U = UT.T
         return loss
@@ -368,7 +370,7 @@ def test1():
     vocab = Vocab(corpus="./data/debug.txt")
     cbow = CBOW(vocab, vector_dim=8)
     cbow.train(corpus="./data/debug.txt", window_size=3,
-               train_epoch=10, learning_rate=1.0)
+               train_epoch=10, learning_rate=0.23)
 
     print(cbow.most_similar_tokens("i", 5))
     print(cbow.most_similar_tokens("he", 5))
@@ -422,7 +424,7 @@ def test2():
     np.random.seed(42)
 
     corpus = "./data/treebank.txt"
-    lr = 1e-1
+    lr = 0.02
     topn = 40
 
     vocab = Vocab(corpus, max_vocab_size=4000)
