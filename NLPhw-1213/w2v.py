@@ -299,8 +299,8 @@ class CBOW:
         
         # TODO: 更新参数（3分）
         e[self.vocab.token_to_idx(target_token)] -= 1
-        self.U -= (learning_rate * self.V@e.reshape(-1, 1)@xbar.reshape(1, -1)).T
-        self.V -= (learning_rate * e.reshape(-1, 1)@h.reshape(1, -1)).T
+        self.U -= learning_rate * (self.V@e.reshape(-1, 1)@xbar.reshape(1, -1)).T
+        self.V -= learning_rate * (e.reshape(-1, 1)@h.reshape(1, -1)).T
         return loss
 
     def similarity(self, token1: str, token2: str):
@@ -422,7 +422,7 @@ def test2():
     np.random.seed(42)
 
     corpus = "./data/treebank.txt"
-    lr = 0.1
+    lr = 1e-1
     topn = 40
 
     vocab = Vocab(corpus, max_vocab_size=4000)
