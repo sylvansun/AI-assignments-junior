@@ -292,15 +292,15 @@ class CBOW:
         # TODO: 前向步骤（3分）
         h = self.U.T@xbar
         e = softmax(self.V.T@h)
-        y = log_softmax(self.V.T@h)
-        
+
         # TODO: 计算loss（3分）
+        y = log_softmax(self.V.T@h)
         loss = -1 * y[self.vocab.token_to_idx(target_token)]
         
         # TODO: 更新参数（3分）
         e[self.vocab.token_to_idx(target_token)] -= 1
-        self.V -= (learning_rate * e.reshape(-1, 1)@h.reshape(1, -1)).T
         self.U -= (learning_rate * self.V@e.reshape(-1, 1)@xbar.reshape(1, -1)).T
+        self.V -= (learning_rate * e.reshape(-1, 1)@h.reshape(1, -1)).T
         return loss
 
     def similarity(self, token1: str, token2: str):
@@ -368,7 +368,7 @@ def test1():
     vocab = Vocab(corpus="./data/debug.txt")
     cbow = CBOW(vocab, vector_dim=8)
     cbow.train(corpus="./data/debug.txt", window_size=3,
-               train_epoch=10, learning_rate=0.23)
+               train_epoch=10, learning_rate=1.0)
 
     print(cbow.most_similar_tokens("i", 5))
     print(cbow.most_similar_tokens("he", 5))
@@ -422,7 +422,7 @@ def test2():
     np.random.seed(42)
 
     corpus = "./data/treebank.txt"
-    lr = 0.023
+    lr = 0.1
     topn = 40
 
     vocab = Vocab(corpus, max_vocab_size=4000)
